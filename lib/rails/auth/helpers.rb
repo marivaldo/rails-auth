@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rails
   # Modular resource-based authentication and authorization for Rails/Rack
   module Auth
@@ -24,7 +26,7 @@ module Rails
 
     # Mark what authorized the request in the Rack environment
     #
-    # @param [Hash] :env Rack environment
+    # @param [Hash] :rack_env Rack environment
     # @param [String] :allowed_by what allowed this request
     def set_allowed_by(rack_env, allowed_by)
       Env.new(rack_env).tap do |env|

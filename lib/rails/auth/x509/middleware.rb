@@ -3,29 +3,20 @@
 module Rails
   module Auth
     module X509
-      # Raised when certificate verification is mandatory
-      CertificateVerifyFailed = Class.new(NotAuthorizedError)
-
-      # Validates X.509 client certificates and adds credential objects for valid
-      # clients to the rack environment as env["rails-auth.credentials"]["x509"]
+      # Extracts X.509 client certificates and adds credential objects to the
+      # rack environment as env["rails-auth.credentials"]["x509"]
       class Middleware
         # Create a new X.509 Middleware object
         #
-        # @param [Object]               app next app in the Rack middleware chain
-        # @param [Hash]                 cert_filters maps Rack environment names to cert extractors
-        # @param [String]               ca_file path to the CA bundle to verify client certs with
-        # @param [OpenSSL::X509::Store] truststore (optional) provide your own truststore (for e.g. CRLs)
-        # @param [Boolean]              require_cert causes middleware to raise if certs are unverified
+        # @param [Object] app next app in the Rack middleware chain
+        # @param [Hash]   cert_filters maps Rack environment names to cert extractors
+        # @param [Logger] logger place to log certificate extraction issues
         #
         # @return [Rails::Auth::X509::Middleware] new X509 middleware instance
-        def initialize(app, cert_filters: {}, ca_file: nil, truststore: nil, require_cert: false, logger: nil)
-          raise ArgumentError, "no ca_file given" unless ca_file
-
+        def initialize(app, cert_filters: {}, logger: nil)
           @app          = app
-          @logger       = logger
-          @truststore   = truststore || OpenSSL::X509::Store.new.add_file(ca_file)
-          @require_cert = require_cert
           @cert_filters = cert_filters
+          @logger       = logger
 
           @cert_filters.each do |key, filter|
             next unless filter.is_a?(Symbol)
@@ -40,7 +31,7 @@ module Rails
 
         def call(env)
           credential = extract_credential(env)
-          Rails::Auth.add_credential(env, "x509".freeze, credential.freeze) if credential
+          Rails::Auth.add_credential(env, "x509", credential.freeze) if credential
 
           @app.call(env)
         end
@@ -52,16 +43,9 @@ module Rails
             cert = extract_certificate_with_filter(filter, env[key])
             next unless cert
 
-            if @truststore.verify(cert)
-              log("Verified", cert)
-              return Rails::Auth::X509::Certificate.new(cert)
-            else
-              log("Verify FAILED", cert)
-              raise CertificateVerifyFailed, "verify failed: #{subject(cert)}" if @require_cert
-            end
+            return Rails::Auth::X509::Certificate.new(cert)
           end
 
-          raise CertificateVerifyFailed, "no client certificate in request" if @require_cert
           nil
         end
 
@@ -72,13 +56,9 @@ module Rails
           end
 
           filter.call(raw_cert)
-        rescue => ex
-          @logger.debug("rails-auth: Certificate error: #{ex.class}: #{ex.message}") if @logger
+        rescue StandardError => e
+          @logger.debug("rails-auth: Certificate error: #{e.class}: #{e.message}") if @logger
           nil
-        end
-
-        def log(message, cert)
-          @logger.debug("rails-auth: #{message} (#{subject(cert)})") if @logger
         end
 
         def subject(cert)

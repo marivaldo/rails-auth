@@ -1,3 +1,55 @@
+### 3.1.0 (2021-10-26)
+
+* [#70](https://github.com/square/rails-auth/pull/70)
+  Support URL-encoded PEMs to support new Puma header requirements.
+  ([@drcapulet])
+
+### 3.0.0 (2020-08-10)
+
+* [#68](https://github.com/square/rails-auth/pull/68)
+  Remove `ca_file` and `require_cert` options to the config builder as we no
+  longer verify the certificate chain.
+  ([@drcapulet])
+
+* [#67](https://github.com/square/rails-auth/pull/67)
+  Remove `ca_file`, `require_cert`, and `truststore` options to X509 middleware
+  as we no longer verify the certificate chain.
+  ([@drcapulet])
+
+### 2.2.2 (2020-07-02)
+
+* [#65](https://github.com/square/rails-auth/pull/65)
+  Fix error when passing `truststore` instead of `ca_file` to X509 middleware.
+  ([@drcapulet])
+
+### 2.2.1 (2020-01-08)
+
+* [#63](https://github.com/square/rails-auth/pull/63)
+  Fix `FrozenError` in `permit` matcher description.
+  ([@drcapulet])
+
+### 2.2.0 (2019-12-05)
+
+* [#55](https://github.com/square/rails-auth/pull/55)
+  Allow dynamic injection of credentials.
+  ([@drcapulet])
+
+* [#59](https://github.com/square/rails-auth/pull/59)
+  Expose X.509 Subject Alternative Name extension
+  in the Rails::Auth::X509::Certificate and provide a convenience
+  method `spiffe_id` to expose [SPIFFE ID](https://spiffe.io).
+  ([@mbyczkowski])
+
+* [#57](https://github.com/square/rails-auth/pull/57)
+  Add support for latest versions of Ruby, JRuby and Bundler 2.
+  ([@mbyczkowski])
+
+### 2.1.4 (2018-07-12)
+
+* [#51](https://github.com/square/rails-auth/pull/51)
+  Fix bug in `permit` custom matcher so that a description is rendered.
+  ([@yellow-beard])
+
 ### 2.1.3 (2017-08-04)
 
 * [#44](https://github.com/square/rails-auth/pull/44)
@@ -178,6 +230,9 @@
 * Vaporware release to claim the "rails-auth" gem name
 
 
-[@tarcieri]: https://github.com/tarcieri
-[@ewr]: https://github.com/ewr
 [@drcapulet]: https://github.com/drcapulet
+[@ewr]: https://github.com/ewr
+[@mbyczkowski]: https://github.com/mbyczkowski
+[@nerdrew]: https://github.com/nerdrew
+[@tarcieri]: https://github.com/tarcieri
+[@yellow-beard]: https://github.com/yellow-beard
